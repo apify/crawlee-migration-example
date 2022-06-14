@@ -1,7 +1,7 @@
-import { createCheerioRouter, Dataset } from '@crawlee/cheerio';
+import { CheerioRoot, createPlaywrightRouter, Dataset } from 'crawlee';
 import { GlobalContext, Label } from './types.js';
 
-export const router = createCheerioRouter();
+export const router = createPlaywrightRouter();
 
 router.addDefaultHandler(async ({ enqueueLinks, crawler }) => {
     const state = await crawler.getState<GlobalContext>();
@@ -29,18 +29,24 @@ router.addDefaultHandler(async ({ enqueueLinks, crawler }) => {
     });
 });
 
+declare const $: CheerioRoot;
+
 function createRoute(label: Label, glob: string) {
-    router.addHandler(label, async ({ enqueueLinks, request, $, log, crawler }) => {
-        const title = $('title').text();
+    router.addHandler(label, async ({ enqueueLinks, request, page, injectJQuery, log, crawler }) => {
+        const title = await page.title();
+
+        await injectJQuery();
         const state = await crawler.getState<GlobalContext>();
         state.openedPages++;
         state.pagesByType[label]++;
         log.info(`${title}`, state);
 
-        const sidebar = $('.table-of-contents li a').get().map((el) => ({
-            href: $(el).attr('href'),
-            text: $(el).text().trim(),
-        }));
+        const sidebar = await page.evaluate(() => {
+            return $('.table-of-contents li a').get().map((el) => ({
+                href: $(el).attr('href'),
+                text: $(el).text().trim(),
+            }));
+        });
 
         await Dataset.pushData({
             title,

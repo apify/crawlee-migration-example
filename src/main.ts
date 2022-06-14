@@ -1,5 +1,5 @@
 import { Actor } from 'apify';
-import { CheerioCrawler, KeyValueStore, log } from '@crawlee/cheerio';
+import { PlaywrightCrawler, KeyValueStore, log } from 'crawlee';
 import { router } from './routes.js';
 import { GlobalContext, InputSchema } from './types';
 
@@ -13,13 +13,14 @@ if (debug) {
 
 const proxyConfiguration = await Actor.createProxyConfiguration();
 
-const crawler = new CheerioCrawler({
+const crawler = new PlaywrightCrawler({
     proxyConfiguration,
     // Be nice to the websites.
     // Remove to unleash full power.
     maxConcurrency: 50,
     requestHandler: router,
     requestHandlerTimeoutSecs: 10,
+    launchContext: { launchOptions: { headless: true } },
 });
 
 await crawler.getState<GlobalContext>({
