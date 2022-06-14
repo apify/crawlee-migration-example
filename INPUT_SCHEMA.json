@@ -1,0 +1,25 @@
+{
+  "title": "Crawlee docs analyzer",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "startUrls": {
+      "title": "Start URLs",
+      "type": "array",
+      "description": "URLs to start with.",
+      "editor": "requestListSources",
+      "prefill": [
+        { "url": "https://apify.github.io/apify-ts" }
+      ]
+    },
+    "debug": {
+      "title": "Debug mode",
+      "type": "boolean",
+      "description": "Enable additional logging",
+      "editor": "checkbox"
+    }
+  },
+  "required": [
+    "startUrls"
+  ]
+}
