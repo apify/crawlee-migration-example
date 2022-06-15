@@ -23,12 +23,13 @@ const crawler = new PlaywrightCrawler({
     launchContext: { launchOptions: { headless: true } },
 });
 
-await crawler.getState<GlobalContext>({
+const state = await crawler.getState<GlobalContext>({
     openedPages: 0,
     pagesByType: {
         API: 0,
         EXAMPLE: 0,
         GUIDE: 0,
+        SKIPPED: 0,
     },
 });
 
@@ -36,6 +37,6 @@ await crawler.addRequests(startUrls);
 
 log.info('Starting the crawl.');
 await crawler.run();
-log.info('Crawl finished.');
+log.info('Crawl finished.', state);
 
 await Actor.exit();

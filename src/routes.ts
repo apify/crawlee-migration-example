@@ -12,6 +12,10 @@ router.addDefaultHandler(async ({ enqueueLinks, crawler }) => {
             { glob: 'https://apify.github.io/apify-ts/docs/**' },
         ],
         transformRequestFunction(data) {
+            if (data.url.includes('/apify-ts/api')) {
+                data.skipNavigation = true;
+            }
+
             if (data.url.includes('/apify-ts/docs/examples')) {
                 data.userData ??= {};
                 data.userData.label = 'EXAMPLE';
@@ -32,11 +36,20 @@ router.addDefaultHandler(async ({ enqueueLinks, crawler }) => {
 declare const $: CheerioRoot;
 
 function createRoute(label: Label, glob: string) {
-    router.addHandler(label, async ({ enqueueLinks, request, page, injectJQuery, log, crawler }) => {
+    router.addHandler(label, async ({ enqueueLinks, request, sendRequest, page, injectJQuery, log, crawler }) => {
+        const state = await crawler.getState<GlobalContext>();
+
+        if (request.skipNavigation) {
+            const res = await sendRequest();
+            const title = res.body.match(/<title .*>(.*)<\/title>/);
+            log.warning('skipped request', { label, url: request.loadedUrl, title: title?.[1] });
+            state.pagesByType.SKIPPED++;
+            return;
+        }
+
         const title = await page.title();
 
         await injectJQuery();
-        const state = await crawler.getState<GlobalContext>();
         state.openedPages++;
         state.pagesByType[label]++;
         log.info(`${title}`, state);

@@ -3,7 +3,7 @@ export interface InputSchema {
     debug?: boolean;
 }
 
-export type Label = 'API' | 'EXAMPLE' | 'GUIDE';
+export type Label = 'API' | 'EXAMPLE' | 'GUIDE' | 'SKIPPED';
 
 export interface GlobalContext {
     openedPages: number;
